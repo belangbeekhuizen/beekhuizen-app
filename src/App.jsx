@@ -18,27 +18,50 @@ const APP_INITIATIVE = "Een initiatief van Belang Beekhuizen";
  * de functies hieronder door echte API/database-calls; de rest van de
  * app blijft ongewijzigd werken zolang de functienamen hetzelfde blijven.
  */
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
 window.storage = {
   async get(key) {
-    const raw = localStorage.getItem("beekhuizen_" + key);
-    if (raw === null) {
-      throw new Error("Key not found: " + key);
-    }
-    return { key, value: raw, shared: false };
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/app_storage?key=eq.${encodeURIComponent(key)}&select=value`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+    const data = await res.json();
+    if (!data.length) throw new Error("Key not found: " + key);
+    return { key, value: data[0].value, shared: true };
   },
+
   async set(key, value) {
-    localStorage.setItem("beekhuizen_" + key, value);
-    return { key, value, shared: false };
+    await fetch(`${SUPABASE_URL}/rest/v1/app_storage`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify({ key, value }),
+    });
+    return { key, value, shared: true };
   },
+
   async delete(key) {
-    localStorage.removeItem("beekhuizen_" + key);
-    return { key, deleted: true, shared: false };
+    await fetch(`${SUPABASE_URL}/rest/v1/app_storage?key=eq.${encodeURIComponent(key)}`, {
+      method: "DELETE",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+    return { key, deleted: true, shared: true };
   },
+
   async list(prefix) {
-    const keys = Object.keys(localStorage)
-      .filter(k => k.startsWith("beekhuizen_" + (prefix || "")))
-      .map(k => k.replace("beekhuizen_", ""));
-    return { keys, prefix, shared: false };
+    return { keys: [], prefix, shared: true };
   },
 };
 
@@ -54,12 +77,10 @@ const CATEGORIES = [
   { id: "activiteit", label: "Activiteiten", icon: "🎉" },
   { id: "info", label: "Info & Tips", icon: "💡" },
 ];
-
 const STRATEN = [
-  "Beekhuizenseweg", "Pinkenbergseweg", "Den Bruijl", "Alteveerselaan",
-  "Van Tienhovenlaan", "Thijsselaan", "Beukenweg", "Stalen Enk"
-];
-
+  "Hele buurt",
+  "Beekhuizenseweg", "Pinkenbergseweg", "Den Bruijl", "Van Tienhovenlaan", "Thijsselaan", Beukenlaan 2", "Stalen Enk", "Alteveerselaan"]
+  
 const categoryMeta = {
   hulp:             { bg: "#FFF3E0", badge: "#C86A1E", label: "Hulp gevraagd" },
   ruilen:           { bg: "#E8F5E9", badge: "#3A7050", label: "Ruilen & Weggeven" },
@@ -154,6 +175,7 @@ const SEED_POSTS = [
 
 const POSTS_KEY = "beekhuizen:posts";
 const SESSION_KEY = "beekhuizen:session";
+const PROFILE_KEY = "beekhuizen_profile";
 const USERS_KEY = "beekhuizen:users";
 const DMS_KEY = "beekhuizen:dms";
 
@@ -366,6 +388,7 @@ export default function BeekhuizenApp() {
     const sessionUser = { naam: loginForm.naam.trim(), email: loginForm.email.trim().toLowerCase(), straat: loginForm.straat, huisnummer: loginForm.huisnummer.trim() };
     try {
       await window.storage.set(SESSION_KEY, JSON.stringify(sessionUser), false);
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(sessionUser));
     } catch (e) {
       // continue anyway
     }
@@ -380,7 +403,11 @@ export default function BeekhuizenApp() {
     setIsAdmin(false);
     setLoginStep("code");
     setCodeInput("");
-    setLoginForm({ naam: "", email: "", straat: "Beekhuizenseweg", huisnummer: "" });
+    const savedProfile = localStorage.getItem(PROFILE_KEY);
+if (savedProfile) {
+  setLoginForm(JSON.parse(savedProfile));
+} else {
+  setLoginForm({ naam: "", email: "", straat: "Beekhuizenseweg", huisnummer: "" });
   }
 
   async function savePosts(updated) {
