@@ -36,13 +36,13 @@ window.storage = {
   },
 
   async set(key, value) {
-    await fetch(`${SUPABASE_URL}/rest/v1/app_storage`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/app_storage?on_conflict=key`, {
       method: "POST",
       headers: {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
         "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates",
+        Prefer: "resolution=merge-duplicates,return=representation",
       },
       body: JSON.stringify({ key, value }),
     });
@@ -79,8 +79,16 @@ const CATEGORIES = [
 ];
 const STRATEN = [
   "Hele buurt",
-  "Beekhuizenseweg", "Pinkenbergseweg", "Den Bruijl", "Van Tienhovenlaan", "Thijsselaan", "Beukenlaan 2", "Stalen Enk", "Alteveerselaan"]
-  
+  "Beekhuizenseweg",
+  "Pinkenbergseweg",
+  "Den Bruijl",
+  "Van Tienhovenlaan",
+  "Thijsselaan",
+  "Beukenlaan 2",
+  "Stalen Enk",
+  "Alteveerselaan",
+];
+
 const categoryMeta = {
   hulp:             { bg: "#FFF3E0", badge: "#C86A1E", label: "Hulp gevraagd" },
   ruilen:           { bg: "#E8F5E9", badge: "#3A7050", label: "Ruilen & Weggeven" },
@@ -481,7 +489,7 @@ Geef een korte, hartelijke reactie (1-2 zinnen, informeel, Nederlands) als buurt
     };
     const updated = [newPost, ...posts];
     await savePosts(updated);
-    setForm({ title: "", body: "", category: "info", straat: "Beekhuizenseweg" });
+    setForm({ title: "", body: "", category: "info", straat: "Hele buurt" });
     setShowForm(false);
     showNotif("✅ " + aiText);
     setAiLoading(false);
@@ -1111,4 +1119,4 @@ Geef een korte, hartelijke reactie (1-2 zinnen, informeel, Nederlands) als buurt
     </div>
   );
 }
-
+}
