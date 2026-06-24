@@ -1111,3 +1111,4 @@ Geef een korte, hartelijke reactie (1-2 zinnen, informeel, Nederlands) als buurt
     </div>
   );
 }
+}
