@@ -193,7 +193,7 @@ export default function BeekhuizenApp() {
   const [showForm, setShowForm] = useState(false);
   const [expandedPost, setExpandedPost] = useState(null);
   const [newComment, setNewComment] = useState({});
-  const [form, setForm] = useState({ title: "", body: "", category: "info", straat: "Beekhuizenseweg" });
+  const [form, setForm] = useState({ title: "", body: "", category: "info", straat: "Hele buurt" });
   const [aiLoading, setAiLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [installHint, setInstallHint] = useState(false);
