@@ -79,7 +79,7 @@ const CATEGORIES = [
 ];
 const STRATEN = [
   "Hele buurt",
-  "Beekhuizenseweg", "Pinkenbergseweg", "Den Bruijl", "Van Tienhovenlaan", "Thijsselaan", Beukenlaan 2", "Stalen Enk", "Alteveerselaan"]
+  "Beekhuizenseweg", "Pinkenbergseweg", "Den Bruijl", "Van Tienhovenlaan", "Thijsselaan", "Beukenlaan 2", "Stalen Enk", "Alteveerselaan"]
   
 const categoryMeta = {
   hulp:             { bg: "#FFF3E0", badge: "#C86A1E", label: "Hulp gevraagd" },
